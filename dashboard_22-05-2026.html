@@ -136,22 +136,22 @@
   <div class="kpis">
     <div class="kpi" style="--color:#005CA9">
       <div class="kpi-label">Pacientes hoy</div>
-      <div class="kpi-value">5</div>
+      <div class="kpi-value">136</div>
       <div class="kpi-sub">atenciones registradas</div>
     </div>
     <div class="kpi" style="--color:#8CC63F">
       <div class="kpi-label">Promedio semanal</div>
-      <div class="kpi-value">5.0</div>
+      <div class="kpi-value">136.0</div>
       <div class="kpi-sub">pacientes / día</div>
     </div>
     <div class="kpi" style="--color:#E6007E">
       <div class="kpi-label">Máximo registrado</div>
-      <div class="kpi-value">5</div>
+      <div class="kpi-value">136</div>
       <div class="kpi-sub">en los últimos 7 días</div>
     </div>
     <div class="kpi" style="--color:#F7941D">
       <div class="kpi-label">EPS con más pacientes</div>
-      <div class="kpi-value" style="font-size:18px;margin-top:10px">CONTRATO NEUROSER SUBSIDIADO PGP</div>
+      <div class="kpi-value" style="font-size:18px;margin-top:10px">CONTRATO SALUD MENTAL SUBSIDIADO</div>
       <div class="kpi-sub">contrato del día</div>
     </div>
   </div>
@@ -179,7 +179,7 @@
         <th>Pacientes</th>
         <th>% del total</th>
       </tr>
-      <tr><td>CONTRATO NEUROSER SUBSIDIADO PGP</td><td><span class='badge'>3</span></td><td>60.0%</td></tr><tr><td>CONTRATO ACTIVAMENTE</td><td><span class='badge'>2</span></td><td>40.0%</td></tr>
+      <tr><td>CONTRATO SALUD MENTAL SUBSIDIADO</td><td><span class='badge'>85</span></td><td>62.5%</td></tr><tr><td>CONTRATO SALUD MENTAL CONTRIBUTIVO</td><td><span class='badge'>14</span></td><td>10.3%</td></tr><tr><td>CONTRATO CAPITADO RECUPERACION FISIOTERAPIA SUBSIDIADO</td><td><span class='badge'>15</span></td><td>11.0%</td></tr><tr><td>CONTRATO CAPITADO RECUPERACION FISIOTERAPIA CONTRIBUTIVO</td><td><span class='badge'>19</span></td><td>14.0%</td></tr><tr><td>CONTRATO No 12557 : PROTEGER EPS S.A.S SUBSIDIADO: PGP</td><td><span class='badge'>3</span></td><td>2.2%</td></tr>
     </table>
   </div>
 
@@ -188,7 +188,7 @@
   </div>
 
   <div class="footer">
-    Generado automáticamente por Bot RPA SEMFU · 2026-05-24 12:37
+    Generado automáticamente por Bot RPA SEMFU · 2026-05-24 12:46
   </div>
 
 </div>
@@ -197,10 +197,10 @@
   new Chart(document.getElementById('chartTorta'), {
     type: 'doughnut',
     data: {
-      labels: ["CONTRATO NEUROSER SUBSIDIADO PGP", "CONTRATO ACTIVAMENTE"],
+      labels: ["CONTRATO SALUD MENTAL SUBSIDIADO", "CONTRATO SALUD MENTAL CONTRIBUTIVO", "CONTRATO CAPITADO RECUPERACION FISIOTERAPIA SUBSIDIADO", "CONTRATO CAPITADO RECUPERACION FISIOTERAPIA CONTRIBUTIVO", "CONTRATO No 12557 : PROTEGER EPS S.A.S SUBSIDIADO: PGP"],
       datasets: [{
-        data: [3, 2],
-        backgroundColor: ["#005CA9", "#8CC63F"],
+        data: [85, 14, 15, 19, 3],
+        backgroundColor: ["#005CA9", "#8CC63F", "#E6007E", "#00A8E0", "#F7941D"],
         borderWidth: 2,
         borderColor: '#fff'
       }]
@@ -216,10 +216,10 @@
   new Chart(document.getElementById('chartBarras'), {
     type: 'bar',
     data: {
-      labels: ["24-05-2026", "24-05-2026", "22-05-2026"],
+      labels: ["22-05-2026"],
       datasets: [{
         label: 'Pacientes',
-        data: [5, 5, 5],
+        data: [136],
         backgroundColor: '#005CA9',
         borderRadius: 6,
         borderSkipped: false,
@@ -238,10 +238,10 @@
   new Chart(document.getElementById('chartLinea'), {
     type: 'line',
     data: {
-      labels: ["24-05-2026", "24-05-2026", "22-05-2026"],
+      labels: ["22-05-2026"],
       datasets: [{
         label: 'Pacientes atendidos',
-        data: [5, 5, 5],
+        data: [136],
         borderColor: '#8CC63F',
         backgroundColor: 'rgba(140, 198, 63, 0.15)',
         borderWidth: 3,
