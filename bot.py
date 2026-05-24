@@ -981,9 +981,25 @@ def modo_test(fecha=None):
     log("✅ Test completado — revisa Gmail, el correo trae el link al dashboard")
 
 # ══════════════════════════════════════════════════════
+# HELPERS DE FECHA
+# ══════════════════════════════════════════════════════
+def ddmmyyyy_a_sisma(fecha_ddmmyyyy):
+    """Convierte DD-MM-YYYY → YYYY/MM/DD (formato que usa SISMA en la URL)."""
+    partes = fecha_ddmmyyyy.split("-")
+    return f"{partes[2]}/{partes[1]}/{partes[0]}"
+
+def validar_fecha(fecha_str):
+    """Valida que el string tenga formato DD-MM-YYYY. Lanza ValueError si no."""
+    try:
+        datetime.datetime.strptime(fecha_str, "%d-%m-%Y")
+    except ValueError:
+        raise ValueError(f"Formato de fecha inválido: '{fecha_str}'. Debe ser DD-MM-YYYY.")
+
+# ══════════════════════════════════════════════════════
 # MAIN
 # ══════════════════════════════════════════════════════
 def main():
+    # ── Modo TEST ──────────────────────────────────────
     if len(sys.argv) > 1 and sys.argv[1] == "test":
         fecha = sys.argv[2] if len(sys.argv) > 2 else None
         modo_test(fecha)
@@ -993,25 +1009,39 @@ def main():
     log("  BOT SISMA → Google Sheets — SEMFU")
     log("═══════════════════════════════════════")
 
-    nombre_hoja = nombre_hoja_hoy()
+    # ── Fecha: argumento o hoy ─────────────────────────
+    if len(sys.argv) > 1:
+        nombre_hoja = sys.argv[1]          # DD-MM-YYYY pasado por argumento
+        try:
+            validar_fecha(nombre_hoja)
+        except ValueError as e:
+            log(f"❌ {e}")
+            sys.exit(1)
+        fecha_sisma = ddmmyyyy_a_sisma(nombre_hoja)
+        log(f"Fecha solicitada: {nombre_hoja} (SISMA: {fecha_sisma})")
+    else:
+        nombre_hoja = nombre_hoja_hoy()    # fecha de hoy por defecto
+        fecha_sisma = fecha_hoy()
+        log(f"Fecha: hoy ({nombre_hoja})")
+
     driver = None
 
     try:
         driver = iniciar_driver()
         login(driver)
         ir_a_consolidados(driver)
-        generar_informe(driver)
+        generar_informe(driver, fecha_sisma)   # ← pasa la fecha al reporte
         encabezados, datos = extraer_datos(driver)
 
         if datos:
-            total    = exportar_a_sheets(encabezados, datos, nombre_hoja)
-            conteos  = analizar_datos(encabezados, datos)
+            total     = exportar_a_sheets(encabezados, datos, nombre_hoja)
+            conteos   = analizar_datos(encabezados, datos)
             historial = obtener_historial_dashboard()
             ruta      = generar_dashboard_html(nombre_hoja, total, conteos, historial)
             link      = subir_dashboard_a_github(ruta, nombre_hoja)
             enviar_correo(total, nombre_hoja, conteos, link_dashboard=link, exito=True)
         else:
-            log("⚠ Sin datos hoy")
+            log(f"⚠ Sin datos para {nombre_hoja}")
             enviar_correo(0, nombre_hoja, {}, exito=True)
 
         log("Proceso finalizado ✓")
