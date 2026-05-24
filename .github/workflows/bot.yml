@@ -1,0 +1,100 @@
+name: Bot RPA SISMA — SEMFU
+
+on:
+  schedule:
+    # 9:30 AM hora Colombia (UTC-5) = 14:30 UTC
+    - cron: '30 14 * * 1-5'   # lunes a viernes
+  workflow_dispatch:
+    inputs:
+      fecha:
+        description: 'Fecha a procesar (DD-MM-YYYY). Vacío = hoy.'
+        required: false
+        default: ''
+      modo:
+        description: 'Modo de ejecución'
+        required: true
+        default: 'normal'
+        type: choice
+        options:
+          - normal
+          - test
+
+jobs:
+  ejecutar-bot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      # ── 1. Código del repo ──────────────────────────────────────────────────
+      - name: Checkout repositorio
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.PAT_GITHUB }}
+
+      # ── 2. Python ───────────────────────────────────────────────────────────
+      - name: Configurar Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      # ── 3. Dependencias ─────────────────────────────────────────────────────
+      - name: Instalar dependencias Python
+        run: |
+          pip install --upgrade pip
+          pip install \
+            selenium \
+            webdriver-manager \
+            gspread \
+            google-auth \
+            google-auth-oauthlib \
+            google-auth-httplib2 \
+            PyGithub
+
+      # ── 4. Chrome ───────────────────────────────────────────────────────────
+      - name: Instalar Google Chrome
+        run: |
+          wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
+          echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" \
+            | sudo tee /etc/apt/sources.list.d/google-chrome.list
+          sudo apt-get update -q
+          sudo apt-get install -y google-chrome-stable
+          google-chrome --version
+
+      # ── 5. Credenciales Google ──────────────────────────────────────────────
+      - name: Escribir credentials.json
+        run: echo '${{ secrets.GOOGLE_CREDENTIALS_JSON }}' > credentials.json
+
+      # ── 6. Ejecutar bot ─────────────────────────────────────────────────────
+      - name: Ejecutar bot.py
+        env:
+          GITHUB_TOKEN_BOT: ${{ secrets.PAT_GITHUB }}
+          EMAIL_CONTRASENA:  ${{ secrets.EMAIL_CONTRASENA }}
+          SISMA_PASSWORD:    ${{ secrets.SISMA_PASSWORD }}
+        run: |
+          MODO="${{ github.event.inputs.modo }}"
+          FECHA="${{ github.event.inputs.fecha }}"
+
+          if [ "$MODO" = "test" ]; then
+            FECHA_ARG="${FECHA:-$(date +'%d-%m-%Y')}"
+            echo "▶ Modo TEST con fecha: $FECHA_ARG"
+            python bot.py test "$FECHA_ARG"
+          else
+            if [ -n "$FECHA" ]; then
+              echo "▶ Modo NORMAL con fecha: $FECHA"
+              python bot.py "$FECHA"
+            else
+              echo "▶ Modo NORMAL (fecha de hoy)"
+              python bot.py
+            fi
+          fi
+
+      # ── 7. Artefacto de logs (siempre, aunque falle) ────────────────────────
+      - name: Guardar log de ejecución
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: log-${{ github.run_id }}
+          path: '*.log'
+          if-no-files-found: ignore
+          retention-days: 14
