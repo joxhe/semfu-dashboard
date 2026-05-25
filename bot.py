@@ -451,12 +451,27 @@ def analizar_datos(encabezados, datos):
 # ══════════════════════════════════════════════════════
 def generar_dashboard_html(nombre_hoja, total, conteos_eps, historial):
     """
-    El dashboard es dinámico — consulta el Apps Script en tiempo real.
-    El HTML se genera inline, sin depender de archivos externos.
+    El dashboard v2 es autocontenido — consulta el Apps Script en tiempo real.
+    Lee el HTML desde dashboard_template.html y lo copia como dashboard.html.
+    Los parámetros nombre_hoja/total/conteos_eps/historial se conservan por
+    compatibilidad, pero no se inyectan: el navegador los carga vía API.
     """
-    ruta_salida = os.path.join(os.path.dirname(os.path.abspath(__file__)), "dashboard.html")
+    base = os.path.dirname(os.path.abspath(__file__))
+    ruta_template = os.path.join(base, "dashboard_template.html")
+    ruta_salida   = os.path.join(base, "dashboard.html")
 
-    html = """<!DOCTYPE html>
+    with open(ruta_template, "r", encoding="utf-8") as f:
+        html = f.read()
+
+    with open(ruta_salida, "w", encoding="utf-8") as f:
+        f.write(html)
+    log("Dashboard HTML v2 listo ✓")
+    return ruta_salida
+
+# ══════════════════════════════════════════════════════
+# GITHUB PAGES — Subir dashboard y obtener link
+# ══════════════════════════════════════════════════════
+_OLD_INLINE_HTML = """<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
@@ -824,11 +839,6 @@ window.addEventListener("DOMContentLoaded",()=>aplicarAtajo(7,document.querySele
 </script>
 </body>
 </html>"""
-
-    with open(ruta_salida, "w", encoding="utf-8") as f:
-        f.write(html)
-    log("Dashboard HTML listo ✓")
-    return ruta_salida
 
 # ══════════════════════════════════════════════════════
 # GITHUB PAGES — Subir dashboard y obtener link
