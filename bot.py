@@ -21,6 +21,9 @@ from webdriver_manager.chrome import ChromeDriverManager
 import gspread
 from google.oauth2.service_account import Credentials
 from github import Github, Auth
+from zoneinfo import ZoneInfo
+
+COLOMBIA_TZ = ZoneInfo("America/Bogota")
 
 # ══════════════════════════════════════════════════════
 # CONFIGURACIÓN
@@ -50,10 +53,10 @@ def log(msg):
     print(f"[{datetime.datetime.now().strftime('%H:%M:%S')}] {msg}")
 
 def fecha_hoy():
-    return datetime.date.today().strftime("%Y/%m/%d")
+    return datetime.datetime.now(COLOMBIA_TZ).strftime("%Y/%m/%d")
 
 def nombre_hoja_hoy():
-    return datetime.date.today().strftime("%d-%m-%Y")
+    return datetime.datetime.now(COLOMBIA_TZ).strftime("%d-%m-%Y")
 
 def esperar_y_click(driver, by, selector, timeout=15, descripcion="elemento"):
     wait = WebDriverWait(driver, timeout)
@@ -369,11 +372,11 @@ def exportar_a_sheets(encabezados, datos, nombre_hoja=None):
     cliente = conectar_sheets()
     spreadsheet = cliente.open_by_key(SHEET_ID)
     sheet = obtener_o_crear_hoja(spreadsheet, nombre_hoja)
+    sheet.clear()
     encabezados_con_fecha = ["FECHA EXTRACCIÓN"] + encabezados
-    if not sheet.row_values(1):
-        sheet.insert_row(encabezados_con_fecha, index=1)
-        log("Encabezados escritos ✓")
-    fecha_extraccion = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
+    sheet.insert_row(encabezados_con_fecha, index=1)
+    log("Encabezados escritos ✓")
+    fecha_extraccion = datetime.datetime.now(COLOMBIA_TZ).strftime("%Y-%m-%d %H:%M")
     filas = [[fecha_extraccion] + fila for fila in datos]
     if filas:
         sheet.append_rows(filas, value_input_option="USER_ENTERED")

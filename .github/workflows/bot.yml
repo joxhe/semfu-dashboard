@@ -2,8 +2,8 @@ name: Bot RPA SISMA — SEMFU
 
 on:
   schedule:
-    # 9:30 AM hora Colombia (UTC-5) = 14:30 UTC
-   - cron: '30 23 * * 1-6' 
+    # 11:30 PM hora Colombia (UTC-5) = 04:30 UTC del día siguiente
+    - cron: '30 4 * * 2-6'
   workflow_dispatch:
     inputs:
       fecha:
