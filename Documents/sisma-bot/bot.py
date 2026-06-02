@@ -146,13 +146,14 @@ def esperar_contenido_dinamico(driver, timeout=30):
                 log(f"iframe topFrame listo ({n} links) ✓")
                 return True
         except Exception:
-            pass
+            cerrar_alert_si_existe(driver)
         time.sleep(1)
     return False
 
 def ir_a_consolidados(driver):
     log("Haciendo clic en Consolidados...")
     esperar_contenido_dinamico(driver)
+    cerrar_alert_si_existe(driver)
     time.sleep(1)
     resultado = driver.execute_script("""
         var iframe = document.querySelector('#topFrame');
