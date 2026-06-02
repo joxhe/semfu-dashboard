@@ -178,12 +178,10 @@ def generar_informe(driver, fecha=None):
         f"&idEspecialidad=&todosEsp=1&inicial={hoy}&final={hoy}&mostrar=A&detallarPago=1"
     )
     log(f"Navegando a reporte: {hoy}")
-    cerrar_alert_si_existe(driver)
     try:
         driver.get(url_reporte)
     except Exception:
-        cerrar_alert_si_existe(driver)
-        driver.get(url_reporte)
+        pass
     cerrar_alert_si_existe(driver)
     wait = WebDriverWait(driver, 30)
     try:
