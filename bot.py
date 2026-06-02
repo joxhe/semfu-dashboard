@@ -58,6 +58,14 @@ def fecha_hoy():
 def nombre_hoja_hoy():
     return datetime.datetime.now(COLOMBIA_TZ).strftime("%d-%m-%Y")
 
+def cerrar_alert_si_existe(driver):
+    try:
+        alert = driver.switch_to.alert
+        log(f"⚠ Alerta del sistema: '{alert.text}' — cerrando...")
+        alert.accept()
+    except Exception:
+        pass
+
 def esperar_y_click(driver, by, selector, timeout=15, descripcion="elemento"):
     wait = WebDriverWait(driver, timeout)
     elemento = wait.until(EC.element_to_be_clickable((by, selector)))
@@ -78,6 +86,7 @@ def iniciar_driver():
     options.add_argument("--disable-dev-shm-usage")
     options.add_argument("--disable-notifications")
     options.add_argument("--window-size=1920,1080")
+    options.set_capability("unhandledPromptBehavior", "accept")
     driver = webdriver.Chrome(
         service=Service(ChromeDriverManager().install()),
         options=options
@@ -120,6 +129,7 @@ def login(driver):
     log("Punto de atención seleccionado ✓")
     wait.until(EC.presence_of_element_located((By.TAG_NAME, "body")))
     time.sleep(5)
+    cerrar_alert_si_existe(driver)
     log("Login exitoso ✓")
 
 def esperar_contenido_dinamico(driver, timeout=30):
@@ -136,13 +146,14 @@ def esperar_contenido_dinamico(driver, timeout=30):
                 log(f"iframe topFrame listo ({n} links) ✓")
                 return True
         except Exception:
-            pass
+            cerrar_alert_si_existe(driver)
         time.sleep(1)
     return False
 
 def ir_a_consolidados(driver):
     log("Haciendo clic en Consolidados...")
     esperar_contenido_dinamico(driver)
+    cerrar_alert_si_existe(driver)
     time.sleep(1)
     resultado = driver.execute_script("""
         var iframe = document.querySelector('#topFrame');
@@ -167,7 +178,11 @@ def generar_informe(driver, fecha=None):
         f"&idEspecialidad=&todosEsp=1&inicial={hoy}&final={hoy}&mostrar=A&detallarPago=1"
     )
     log(f"Navegando a reporte: {hoy}")
-    driver.get(url_reporte)
+    try:
+        driver.get(url_reporte)
+    except Exception:
+        pass
+    cerrar_alert_si_existe(driver)
     wait = WebDriverWait(driver, 30)
     try:
         wait.until(EC.presence_of_element_located((By.TAG_NAME, "table")))
